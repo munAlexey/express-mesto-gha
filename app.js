@@ -1,21 +1,24 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const user = require('./models/user')
+const path = require('path');
+const bodyParser = require('body-parser')
+
+const userRouter = require('./routes/users');
 
 const app = express();
-const PORT = 3000;
+const PORT = 3005;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
-  useCreateIndex: true,
-  useFindAndModify: false
 }).then(()=> {
   console.log('reer');
 }).catch(error => {
   console.log(error)
 });
 
-app.use()
+app.use(bodyParser.json())
+
+app.use('/users', userRouter);
 
 app.listen(PORT, () => {
   console.log(`this is port ${PORT}`)
