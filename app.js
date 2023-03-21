@@ -5,7 +5,7 @@ const path = require('path');
 const userRouter = require('./routes/users');
 
 const app = express();
-const PORT = 3005;
+const PORT = 3000;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
