@@ -1,7 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
-const bodyParser = require('body-parser')
 
 const userRouter = require('./routes/users');
 
@@ -16,7 +15,13 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   console.log(error)
 });
 
-app.use(bodyParser.json())
+app.use((req, res, next) => {
+  req.user = {
+    _id: '64197f9c92cb82f47bbb43cc'
+  };
+
+  next();
+});
 
 app.use('/users', userRouter);
 
