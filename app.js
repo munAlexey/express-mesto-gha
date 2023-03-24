@@ -1,8 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
+const bodyParser = require('body-parser');
 
 const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards')
 
 const app = express();
 const PORT = 3000;
@@ -16,6 +18,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   res.status.send({message: "Unauthorized"})
 });
 
+app.use(bodyParser.json());
+
 app.use((req, res, next) => {
   req.user = {
     _id: '64197f9c92cb82f47bbb43cc'
@@ -25,6 +29,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
 app.listen(PORT, () => {
   console.log(`this is port ${PORT}`)

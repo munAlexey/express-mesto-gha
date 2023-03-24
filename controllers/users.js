@@ -1,13 +1,12 @@
 const User = require('../models/user');
 const express = require('express');
-const router = express.Router();
 
 module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
 
   await User.create({ name, about, avatar })
     .then(newUser => res.send({ data: newUser }))
-    .catch(err => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(err => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
 };
 
 module.exports.getUsers = async (req, res) => {
@@ -16,14 +15,40 @@ module.exports.getUsers = async (req, res) => {
       console.log(users);
       res.send({ data: users })
     }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+};
+
+module.exports.patchMe = async (req, res) => {
+  const myId = req.user._id;
+  const { name, about } = req.body;
+
+  await User.findByIdAndUpdate(myId, { name, about }, { new: true }).then((myInfo) => {
+    if(!myInfo) {
+      res.status(404).send({ message: 'Пользователь по указанному _id не найден'})
+    }
+    res.send(myInfo);
+  }).catch(() => {
+    res.status(500).send({ message: 'Ошибка по умолчанию.' })
+  })
+};
+
+module.exports.patchAvatar = async (req, res) => {
+  const myId = req.user._id;
+  const { avatar } = req.body;
+
+  await User.findByIdAndUpdate(myId, { avatar }, { new: true }).then((myAvatar) => {
+    if(!avatar) {
+      return res.send(res.status(404).send({ message: 'Пользователь по указанному _id не найден'}))
+    }
+    res.send(myAvatar);
+  }).catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }))
 };
 
 module.exports.getUser = async (req, res) => {
   const { userId } = req.params;
 
-  const user = await User.findById(userId);
+  const user = await User.findById(userId).orFail(new Error('Пользователь по указанному _id не найден'));
   res.send(JSON.stringify(user))
     .then(user => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка, пользователь с таким id не найден' }));
+    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
 };

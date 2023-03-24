@@ -1,4 +1,3 @@
-const { ObjectId } = require('mongodb');
 const mongoose = require('mongoose');
 
 const cardSchema = new mongoose.Schema({
@@ -9,21 +8,22 @@ const cardSchema = new mongoose.Schema({
     maxlength: 30,
   },
   owner: {
-    type: mongoose.Schema.type.ObjectId,
+    type: mongoose.ObjectId,
     required: true
   },
   link: {
     type: String,
     required: true
   },
-  likes: {
-    type: mongoose.Schema.type.ObjectId,
-    default: []
-  },
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-module.exports = mongoose.model('user', cardSchema);
+module.exports = mongoose.model('card', cardSchema);
