@@ -14,7 +14,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 }).then((req, res)=> {
   console.log('reer');
 }).catch(error => {
-  res.status = "401"
+  res.status = "500"
   res.status.send({message: "Unauthorized"})
 });
 
