@@ -15,21 +15,31 @@ module.exports.createCard = async (req, res) => {
 
   await Card.create({ name, link, owner: req.user._id })
     .then(newCard => {
-      console.log(newCard);
       res.send({ data: newCard });
     })
-    .catch(err => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+    .catch(err => {
+      if(err.name = "CastError") {
+        res.status(400).send({ message: 'Переданы некорректные данные.' })
+      } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' })
+      }
+    });
 };
 
 module.exports.deleteCard = async (req, res) => {
-  const { cardId } = req.params.cardId;
+  const userId = req.user._id;
+  const owner = req.params._id;
 
-  Card.findByIdAndDelete(cardId).orFail(() => {
-    res.status(400);
-    res.send('Переданы некорректные данные при создании пользователя.')
-  }).then((result) => {
-    res.send(result)
-  })
+  Card.findById(owner).then(card => {
+    if(card.owner !== userId) {
+      Card.findByIdAndDelete(card).orFail(() => {
+        res.status(400);
+        res.send('Переданы некорректные данные при создании пользователя.')
+      }).then((result) => {
+        res.send(result)
+      })
+    }
+  }).catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }))
 }
 
 module.exports.addLike = (req, res) => Card.findByIdAndUpdate(
