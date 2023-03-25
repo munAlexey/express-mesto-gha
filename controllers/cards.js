@@ -36,10 +36,26 @@ module.exports.addLike = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $addToSet: { likes: req.user._id } },
   { new: true },
-)
+).orFail(() => {
+  res.send({ message: 'Передан несуществующий _id карточки.'})
+}).catch((err) => {
+  if(err.name = "CastError") {
+    res.status(400).send({ message: 'ереданы некорректные данные для постановки/снятии лайка.' })
+  } else {
+    res.status(500).send({ message: 'Ошибка по умолчанию.' })
+  }
+});
 
 module.exports.removeLike = (req, res) => Card.findByIdAndUpdate(
   req.params.cardId,
   { $pull: { likes: req.user._id } },
   { new: true },
-)
+).orFail(() => {
+  res.send({ message: 'Передан несуществующий _id карточки.'})
+}).catch((err) => {
+  if(err.name = "CastError") {
+    res.status(400).send({ message: 'ереданы некорректные данные для постановки/снятии лайка.' })
+  } else {
+    res.status(500).send({ message: 'Ошибка по умолчанию.' })
+  }
+});
