@@ -6,7 +6,13 @@ module.exports.createUser = async (req, res) => {
 
   await User.create({ name, about, avatar })
     .then(newUser => res.send({ data: newUser }))
-    .catch(err => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+    .catch(err => {
+      if(err.name = "CastError") {
+        res.status(400).send({ message: 'Переданы некорректные данные.' })
+      } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' })
+      }
+    });
 };
 
 module.exports.getUsers = async (req, res) => {
@@ -47,8 +53,8 @@ module.exports.patchAvatar = async (req, res) => {
 module.exports.getUser = async (req, res) => {
   const { userId } = req.params;
 
-  const user = await User.findById(userId).orFail(new Error('Пользователь по указанному _id не найден'));
-  res.send(JSON.stringify(user))
+  const user = await User.findById(userId).orFail(() => res.send({ message: 'Пользователь по указанному _id не найден'}));
+  res.send(user)
     .then(user => res.send({ data: user }))
     .catch((err) => {
       if(err.name = "CastError") {
