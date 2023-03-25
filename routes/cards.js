@@ -1,9 +1,10 @@
 const express = require('express');
+
 const router = express.Router();
 
-const { deleteCard, createCard, getCards, addLike, removeLike } = require('../controllers/cards');
-
-const cards = [];
+const {
+  deleteCard, createCard, getCards, addLike, removeLike,
+} = require('../controllers/cards');
 
 router.get('/', getCards);
 

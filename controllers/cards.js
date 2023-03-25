@@ -1,19 +1,17 @@
-const Card = require("../models/card");
-const express = require("express");
+const Card = require('../models/card');
 const {
   ERROR_INCORRECT_DATA,
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
-} = require("../utils/constants");
+} = require('../utils/constants');
 
 module.exports.getCards = async (req, res) => {
   await Card.find({})
     .then((cards) => {
-      console.log(cards);
       res.send({ data: cards });
     })
     .catch(() =>
-      res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." })
+      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' })
     );
 };
 
@@ -25,12 +23,12 @@ module.exports.createCard = async (req, res) => {
       res.send({ data: newCard });
     })
     .catch((err) => {
-      if ((err.name = "ValidationError")) {
+      if ((err.name = 'ValidationError')) {
         res
           .status(ERROR_INCORRECT_DATA)
-          .send({ message: "Переданы некорректные данные." });
+          .send({ message: 'Переданы некорректные данные.' });
       } else {
-        res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
       }
     });
 };
@@ -43,7 +41,7 @@ module.exports.deleteCard = async (req, res) => {
     .then((card) => {
       Card.findByIdAndDelete(card)
         .orFail(() => {
-          throw new Error("NotFound");
+          throw new Error('NotFound');
         })
         .then((result) => {
           if (card.owner !== userId) {
@@ -52,20 +50,18 @@ module.exports.deleteCard = async (req, res) => {
         });
     })
     .catch(() => {
-      if (err.message === "NotFound") {
-        res
-          .status(ERROR_NOT_FOUND)
-          .send({
-            message:
-              "Карточка или пользователь не найден или был запрошен несуществующий роут.",
-          });
+      if (err.message === 'NotFound') {
+        res.status(ERROR_NOT_FOUND).send({
+          message:
+            'Карточка или пользователь не найден или был запрошен несуществующий роут.',
+        });
       }
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         res
           .status(ERROR_INCORRECT_DATA)
-          .send({ message: "Переданы некорректные данные." });
+          .send({ message: 'Переданы некорректные данные.' });
       }
-      res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };
 
@@ -76,27 +72,22 @@ module.exports.addLike = (req, res) =>
     { new: true }
   )
     .orFail(() => {
-      throw new Error("NotFound");
+      throw new Error('NotFound');
     })
-    .then(() => res.send({ message: "Вы поставили лайк" }))
+    .then(() => res.send({ message: 'Вы поставили лайк' }))
     .catch((err) => {
-      if (err.message === "NotFound") {
-        res
-          .status(ERROR_NOT_FOUND)
-          .send({
-            message:
-              "Карточка или пользователь не найден или был запрошен несуществующий роут.",
-          });
+      if (err.message === 'NotFound') {
+        res.status(ERROR_NOT_FOUND).send({
+          message:
+            'Карточка или пользователь не найден или был запрошен несуществующий роут.',
+        });
       }
-      if ((err.name = "CastError")) {
-        res
-          .status(ERROR_INCORRECT_DATA)
-          .send({
-            message:
-              "Переданы некорректные данные для постановки/снятии лайка.",
-          });
+      if ((err.name = 'CastError')) {
+        res.status(ERROR_INCORRECT_DATA).send({
+          message: 'Переданы некорректные данные для постановки/снятии лайка.',
+        });
       } else {
-        res.status(500).send({ message: "Ошибка по умолчанию." });
+        res.status(500).send({ message: 'Ошибка по умолчанию.' });
       }
     });
 
@@ -107,22 +98,20 @@ module.exports.removeLike = (req, res) =>
     { new: true }
   )
     .orFail(() => {
-      throw new Error("NotFound");
+      throw new Error('NotFound');
     })
-    .then(() => res.send({ message: "Вы поставили лайк" }))
+    .then(() => res.send({ message: 'Вы поставили лайк' }))
     .catch((err) => {
-      if (err.message === "NotFound") {
+      if (err.message === 'NotFound') {
         res
           .status(ERROR_NOT_FOUND)
-          .send({ message: "Передан несуществующий _id карточки." });
+          .send({ message: 'Передан несуществующий _id карточки.' });
       }
-      if ((err.name = "CastError")) {
-        res
-          .status(ERROR_INCORRECT_DATA)
-          .send({
-            message: "ереданы некорректные данные для постановки/снятии лайка.",
-          });
+      if ((err.name = 'CastError')) {
+        res.status(ERROR_INCORRECT_DATA).send({
+          message: 'Переданы некорректные данные для постановки/снятии лайка.',
+        });
       } else {
-        res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
       }
     });

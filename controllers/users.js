@@ -1,11 +1,10 @@
-const User = require("../models/user");
-const express = require("express");
-const { default: mongoose, isValidObjectId } = require("mongoose");
+const { default: mongoose } = require('mongoose');
+const User = require('../models/user');
 const {
   ERROR_INCORRECT_DATA,
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
-} = require("../utils/constants");
+} = require('../utils/constants');
 
 module.exports.createUser = async (req, res) => {
   const { name, about, avatar } = req.body;
@@ -13,12 +12,12 @@ module.exports.createUser = async (req, res) => {
   await User.create({ name, about, avatar })
     .then((newUser) => res.send({ data: newUser }))
     .catch((err) => {
-      if ((err.name = "ValidationError")) {
+      if ((err.name = 'ValidationError')) {
         res
           .status(ERROR_INCORRECT_DATA)
-          .send({ message: "Переданы некорректные данные." });
+          .send({ message: 'Переданы некорректные данные.' });
       } else {
-        res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
       }
     });
 };
@@ -30,7 +29,7 @@ module.exports.getUsers = async (req, res) => {
       res.send({ data: users });
     })
     .catch(() =>
-      res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." })
+      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' })
     );
 };
 
@@ -41,9 +40,9 @@ module.exports.patchMe = async (req, res) => {
   if (!{ name, about }) {
     return res.send(
       res.status(ERROR_INCORRECT_DATA).send({
-        message: "Переданы некорректные данные при создании пользователя.",
+        message: 'Переданы некорректные данные при создании пользователя.',
       })
-    );
+    )
   }
 
   await User.findByIdAndUpdate(
@@ -55,12 +54,12 @@ module.exports.patchMe = async (req, res) => {
       res.send(myInfo);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         res.status(ERROR_INCORRECT_DATA).send({
-          message: "Переданы некорректные данные при создании пользователя.",
+          message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
       }
     });
 };
@@ -72,7 +71,7 @@ module.exports.patchAvatar = async (req, res) => {
   if (!avatar) {
     return res.send(
       res.status(ERROR_INCORRECT_DATA).send({
-        message: "Переданы некорректные данные при создании пользователя.",
+        message: 'Переданы некорректные данные при создании пользователя.',
       })
     );
   }
@@ -80,18 +79,18 @@ module.exports.patchAvatar = async (req, res) => {
   await User.findByIdAndUpdate(
     myId,
     { avatar },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((myAvatar) => {
       res.send(myAvatar);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         res.status(ERROR_INCORRECT_DATA).send({
-          message: "Переданы некорректные данные при создании пользователя.",
+          message: 'Переданы некорректные данные при создании пользователя.',
         });
       } else {
-        res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
       }
     });
 };
@@ -102,20 +101,19 @@ module.exports.getUser = async (req, res) => {
   if (!mongoose.isValidObjectId(userId)) {
     res
       .status(ERROR_INCORRECT_DATA)
-      .send({ message: "Переданы некорректные данные." });
+      .send({ message: 'Переданы некорректные данные.' });
   }
 
   const user = await User.findById(userId).orFail(() => {
-    throw  new Error('NotFound');
-  }
-  );
+    throw new Error('NotFound');
+  });
   res
     .send(user)
-    .then((user) => res.send({ data: user }))
+    .then((userData) => res.send({ data: userData }))
     .catch((err) => {
       if (err.message === 'NotFound') {
-        res.status(ERROR_NOT_FOUND).send({ message: "Пользователь по указанному _id не найден" })
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
       }
-      res.status(ERROR_DEFAULT).send({ message: "Ошибка по умолчанию." });
+      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
     });
 };
