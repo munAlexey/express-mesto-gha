@@ -24,7 +24,7 @@ module.exports.patchMe = async (req, res) => {
 
   await User.findByIdAndUpdate(myId, { name, about }, { new: true }).then((myInfo) => {
     if(!myInfo) {
-      res.status(404).send({ message: 'Пользователь по указанному _id не найден'})
+      res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'})
     }
     res.send(myInfo);
   }).catch(() => {
@@ -38,7 +38,7 @@ module.exports.patchAvatar = async (req, res) => {
 
   await User.findByIdAndUpdate(myId, { avatar }, { new: true }).then((myAvatar) => {
     if(!avatar) {
-      return res.send(res.status(404).send({ message: 'Пользователь по указанному _id не найден'}))
+      return res.send(res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'}))
     }
     res.send(myAvatar);
   }).catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }))

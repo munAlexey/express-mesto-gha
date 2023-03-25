@@ -25,8 +25,8 @@ module.exports.deleteCard = async (req, res) => {
   const { cardId } = req.params.cardId;
 
   Card.findByIdAndDelete(cardId).orFail(() => {
-    res.status(404);
-    res.send('Пользователь с указанным _id не найден')
+    res.status(400);
+    res.send('ППереданы некорректные данные при создании пользователя.')
   }).then((result) => {
     res.send(result)
   })
