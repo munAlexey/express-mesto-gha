@@ -26,7 +26,7 @@ module.exports.deleteCard = async (req, res) => {
 
   Card.findByIdAndDelete(cardId).orFail(() => {
     res.status(400);
-    res.send('ППереданы некорректные данные при создании пользователя.')
+    res.send('Переданы некорректные данные при создании пользователя.')
   }).then((result) => {
     res.send(result)
   })
@@ -40,7 +40,7 @@ module.exports.addLike = (req, res) => Card.findByIdAndUpdate(
   res.send({ message: 'Передан несуществующий _id карточки.'})
 }).catch((err) => {
   if(err.name = "CastError") {
-    res.status(400).send({ message: 'ереданы некорректные данные для постановки/снятии лайка.' })
+    res.status(400).send({ message: 'Переданы некорректные данные для постановки/снятии лайка.' })
   } else {
     res.status(500).send({ message: 'Ошибка по умолчанию.' })
   }
