@@ -26,7 +26,7 @@ module.exports.patchMe = async (req, res) => {
     if(!myInfo) {
       res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'})
     }
-    res.send(myInfo);
+    res.status(200).send(myInfo);
   }).catch(() => {
     res.status(500).send({ message: 'Ошибка по умолчанию.' })
   })
@@ -50,5 +50,11 @@ module.exports.getUser = async (req, res) => {
   const user = await User.findById(userId).orFail(new Error('Пользователь по указанному _id не найден'));
   res.send(JSON.stringify(user))
     .then(user => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }));
+    .catch((err) => {
+      if(err.name = "CastError") {
+        res.status(400).send({ message: 'Переданы некорректные данные.' })
+      } else {
+        res.status(500).send({ message: 'Ошибка по умолчанию.' })
+      }
+    });
 };
