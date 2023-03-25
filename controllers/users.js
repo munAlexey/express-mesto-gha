@@ -29,11 +29,13 @@ module.exports.patchMe = async (req, res) => {
   const myId = req.user._id;
   const { name, about } = req.body;
 
-  await User.findByIdAndUpdate(myId, { name, about }, { new: true }).then((myInfo) => {
-    if(!myInfo) {
-      res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'})
-    }
-    res.status(200).send(myInfo);
+  if(!{ name, about }) {
+    return res.send(res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'}))
+  }
+
+  await User.findByIdAndUpdate(myId, { name, about }, { new: true })
+  .then(myInfo => {
+    res.send(myInfo);
   }).catch(() => {
     res.status(500).send({ message: 'Ошибка по умолчанию.' })
   })
@@ -43,10 +45,11 @@ module.exports.patchAvatar = async (req, res) => {
   const myId = req.user._id;
   const { avatar } = req.body;
 
+  if(!avatar) {
+    return res.send(res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'}))
+  }
+
   await User.findByIdAndUpdate(myId, { avatar }, { new: true }).then((myAvatar) => {
-    if(!avatar) {
-      return res.send(res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.'}))
-    }
     res.send(myAvatar);
   }).catch(() => res.status(500).send({ message: 'Ошибка по умолчанию.' }))
 };
@@ -60,9 +63,7 @@ module.exports.getUser = async (req, res) => {
 
   const user = await User.findById(userId).orFail(() => res.send({ message: 'Пользователь по указанному _id не найден'}));
   res.send(user)
-    .then(user => {
-      res.send({ data: user });
-    })
+    .then(user => res.send({ data: user }))
     .orFail(() => {
       res.send({ message: 'Пользователь по указанному _id не найден.'})
     })
