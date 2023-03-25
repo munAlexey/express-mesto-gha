@@ -12,7 +12,7 @@ module.exports.createUser = async (req, res) => {
   await User.create({ name, about, avatar })
     .then((newUser) => res.send({ data: newUser }))
     .catch((err) => {
-      if ((err.name = 'ValidationError')) {
+      if ((err.name === 'ValidationError')) {
         res
           .status(ERROR_INCORRECT_DATA)
           .send({ message: 'Переданы некорректные данные.' });
@@ -28,27 +28,17 @@ module.exports.getUsers = async (req, res) => {
       console.log(users);
       res.send({ data: users });
     })
-    .catch(() =>
-      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' })
-    );
+    .catch(() => res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }));
 };
 
 module.exports.patchMe = async (req, res) => {
   const myId = req.user._id;
   const { name, about } = req.body;
 
-  if (!{ name, about }) {
-    return res.send(
-      res.status(ERROR_INCORRECT_DATA).send({
-        message: 'Переданы некорректные данные при создании пользователя.',
-      })
-    )
-  }
-
   await User.findByIdAndUpdate(
     myId,
     { name, about },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((myInfo) => {
       res.send(myInfo);
@@ -67,14 +57,6 @@ module.exports.patchMe = async (req, res) => {
 module.exports.patchAvatar = async (req, res) => {
   const myId = req.user._id;
   const { avatar } = req.body;
-
-  if (!avatar) {
-    return res.send(
-      res.status(ERROR_INCORRECT_DATA).send({
-        message: 'Переданы некорректные данные при создании пользователя.',
-      })
-    );
-  }
 
   await User.findByIdAndUpdate(
     myId,
@@ -102,18 +84,15 @@ module.exports.getUser = async (req, res) => {
     res
       .status(ERROR_INCORRECT_DATA)
       .send({ message: 'Переданы некорректные данные.' });
+    return;
   }
 
-  const user = await User.findById(userId).orFail(() => {
+  await User.findById(userId).orFail(() => {
     throw new Error('NotFound');
-  });
-  res
-    .send(user)
-    .then((userData) => res.send({ data: userData }))
+  }).then((userData) => res.send({ data: userData }))
     .catch((err) => {
       if (err.message === 'NotFound') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
-      }
-      res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
+      } else { res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }); }
     });
 };

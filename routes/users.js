@@ -1,9 +1,10 @@
 const express = require('express');
+
 const router = express.Router();
 
-const { createUser, getUser, getUsers, patchMe, patchAvatar } = require('../controllers/users');
-
-const users = [];
+const {
+  createUser, getUser, getUsers, patchMe, patchAvatar,
+} = require('../controllers/users');
 
 router.get('/', getUsers);
 

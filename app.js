@@ -11,9 +11,9 @@ const PORT = 3000;
 
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
-}).then((req, res) => {
-  console.log('reer');
-}).catch(() => {
+}).then(() => {
+  console.log('start');
+}).catch((res) => {
   res.status(ERROR_DEFAULT).send({ message: 'Unauthorized' });
 });
 
