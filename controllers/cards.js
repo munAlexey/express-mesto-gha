@@ -33,7 +33,7 @@ module.exports.createCard = async (req, res) => {
 
 module.exports.deleteCard = async (req, res) => {
   const userId = req.user._id;
-  const owner = req.params._id;
+  const owner = req.params.cardId;
 
   Card.findById(owner)
     .then((card) => {
@@ -45,6 +45,17 @@ module.exports.deleteCard = async (req, res) => {
           if (card.owner !== userId) {
             res.send(result);
           }
+        }).catch((err) => {
+          if (err.message === 'NotFound') {
+            res.status(ERROR_NOT_FOUND).send({
+              message:
+                'Карточка или пользователь не найден или был запрошен несуществующий роут.',
+            });
+          } else if (err.name === 'CastError') {
+            res
+              .status(ERROR_INCORRECT_DATA)
+              .send({ message: 'Переданы некорректные данные.' });
+          } else { res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }); }
         });
     })
     .catch((err) => {
