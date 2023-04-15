@@ -1,4 +1,7 @@
 const { default: mongoose } = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const { SECRET_KEY, ERROR_UNAUTHORIZED } = require('../utils/constants');
 const User = require('../models/user');
 const {
   ERROR_INCORRECT_DATA,
@@ -7,25 +10,51 @@ const {
 } = require('../utils/constants');
 
 module.exports.createUser = async (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  await User.create({ name, about, avatar })
-    .then((newUser) => res.send({ data: newUser }))
-    .catch((err) => {
-      if ((err.name === 'ValidationError')) {
-        res
-          .status(ERROR_INCORRECT_DATA)
-          .send({ message: 'Переданы некорректные данные.' });
-      } else {
-        res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
-      }
-    });
+  await bcrypt.hash(password, 10).then((hash) => {
+    User.create({
+      name, about, avatar, email, password: hash,
+    })
+      .then((newUser) => res.send({ data: newUser }))
+      .catch((err) => {
+        if ((err.name === 'ValidationError')) {
+          res
+            .status(ERROR_INCORRECT_DATA)
+            .send({ message: 'Переданы некорректные данные.' });
+        } else {
+          res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
+        }
+      });
+  });
+};
+
+module.exports.login = async (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email }).orFail().then(async (user) => {
+    const matched = await bcrypt.compare(password, user.password);
+
+    if (matched) {
+      const token = jwt.sign({ _id: user._id }, SECRET_KEY);
+      res.cookie('jwt', token, {
+        maxAge: 3600,
+        httpOnly: true,
+      }).send(user.toJSON());
+    } else {
+      throw new Error('Invalid email or password');
+    }
+  }).catch(() => {
+    res
+      .status(ERROR_UNAUTHORIZED)
+      .send('Неверная почта или пароль');
+  });
 };
 
 module.exports.getUsers = async (req, res) => {
   await User.find({})
     .then((users) => {
-      console.log(users);
       res.send({ data: users });
     })
     .catch(() => res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }));

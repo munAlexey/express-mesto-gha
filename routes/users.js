@@ -3,12 +3,14 @@ const express = require('express');
 const router = express.Router();
 
 const {
-  createUser, getUser, getUsers, patchMe, patchAvatar,
+  createUser, getUser, getUsers, patchMe, patchAvatar, login,
 } = require('../controllers/users');
 
 router.get('/', getUsers);
 
-router.post('/', createUser);
+router.post('/signup', createUser);
+
+router.post('/signin', login);
 
 router.get('/:userId', getUser);
 
