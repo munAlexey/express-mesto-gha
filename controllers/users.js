@@ -9,6 +9,12 @@ const {
   ERROR_DEFAULT,
 } = require('../utils/constants');
 
+module.exports.getMe = async (req, res) => {
+  const user = await User.findById(req.user._id);
+
+  res.send(user);
+};
+
 module.exports.createUser = async (req, res) => {
   const {
     name, about, avatar, email, password,

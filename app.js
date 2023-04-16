@@ -2,14 +2,15 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const jwt = require('jsonwebtoken');
+const { authorization } = require('./middlewre/authorization');
+
 const {
-  ERROR_DEFAULT, ERROR_NOT_FOUND, SECRET_KEY, ERROR_UNAUTHORIZED,
+  ERROR_DEFAULT, ERROR_NOT_FOUND,
 } = require('./utils/constants');
 
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const authRouter = require('./middlewre/auth');
+const authRouter = require('./routes/auth');
 
 const app = express();
 const PORT = 3000;
@@ -26,16 +27,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
-app.use((req, res, next) => {
-  const token = req.cookies.jwt;
-  try {
-    const payload = jwt.verify(token, SECRET_KEY);
-    req.user = payload;
-    next();
-  } catch (error) {
-    next(new Error(ERROR_UNAUTHORIZED));
-  }
-});
+app.use(authorization);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 app.use((req, res) => {
