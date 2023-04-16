@@ -1,10 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { ERROR_DEFAULT, ERROR_NOT_FOUND } = require('./utils/constants');
+const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
+const {
+  ERROR_DEFAULT, ERROR_NOT_FOUND, SECRET_KEY, ERROR_UNAUTHORIZED,
+} = require('./utils/constants');
 
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
+const authRouter = require('./middlewre/auth');
 
 const app = express();
 const PORT = 3000;
@@ -18,15 +23,19 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 });
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
+app.use('/auth', authRouter);
 app.use((req, res, next) => {
-  req.user = {
-    _id: '64197f9c92cb82f47bbb43cc',
-  };
-
-  next();
+  const token = req.cookies.jwt;
+  try {
+    const payload = jwt.verify(token, SECRET_KEY);
+    req.user = payload;
+    next();
+  } catch (error) {
+    next(new Error(ERROR_UNAUTHORIZED));
+  }
 });
-
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 app.use((req, res) => {
