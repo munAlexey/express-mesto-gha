@@ -1,7 +1,7 @@
 const { default: mongoose } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY, ERROR_UNAUTHORIZED } = require('../utils/constants');
+const { SECRET_KEY, ERROR_UNAUTHORIZED, ERROR_CONFLICT } = require('../utils/constants');
 const User = require('../models/user');
 const {
   ERROR_INCORRECT_DATA,
@@ -30,6 +30,8 @@ module.exports.createUser = async (req, res) => {
           res
             .status(ERROR_INCORRECT_DATA)
             .send({ message: 'Переданы некорректные данные.' });
+        } else if ((err.code === 11000)) {
+          res.status(ERROR_CONFLICT).send({ message: 'Данный email уже зарегистрирован' });
         } else {
           res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
         }
@@ -39,7 +41,7 @@ module.exports.createUser = async (req, res) => {
 
 module.exports.login = async (req, res) => {
   const { email, password } = req.body;
-  User.findOne({ email }).orFail().then(async (user) => {
+  User.findOne({ email }).select('+password').orFail().then(async (user) => {
     const matched = await bcrypt.compare(password, user.password);
 
     if (matched) {
@@ -51,11 +53,12 @@ module.exports.login = async (req, res) => {
     } else {
       throw new Error('Invalid email or password');
     }
-  }).catch(() => {
-    res
-      .status(ERROR_UNAUTHORIZED)
-      .send('Неверная почта или пароль');
-  });
+  })
+    .catch(() => {
+      res
+        .status(ERROR_UNAUTHORIZED)
+        .send('Неверная почта или пароль');
+    });
 };
 
 module.exports.getUsers = async (req, res) => {

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const { urlR } = require('../utils/constants');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -29,10 +30,14 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 2,
     type: String,
+    select: false,
   },
   avatar: {
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
     type: String,
+    validate: {
+      validator: (value) => urlR.test(value),
+    },
     required: false,
   },
 });

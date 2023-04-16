@@ -1,5 +1,6 @@
 const { Joi, celebrate, Segments } = require('celebrate');
 const express = require('express');
+const { urlR } = require('../utils/constants');
 
 const router = express.Router();
 
@@ -14,6 +15,9 @@ router.post('/signup', celebrate({
     password: Joi.string().required(),
     about: Joi.string(),
     avatar: Joi.string(),
+  },
+  [Segments.PARAMS]: {
+    link: Joi.string().pattern(urlR),
   },
 }), createUser);
 
