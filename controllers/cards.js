@@ -6,7 +6,7 @@ const {
 } = require('../utils/constants');
 
 module.exports.getCards = async (req, res) => {
-  await Card.find({})
+  await Card.find({}).populate('owner')
     .then((cards) => {
       res.send({ data: cards });
     })
@@ -14,9 +14,9 @@ module.exports.getCards = async (req, res) => {
 };
 
 module.exports.createCard = async (req, res) => {
-  const { name, link } = req.body;
+  const { name, link, ownerId } = req.body;
 
-  await Card.create({ name, link, owner: req.user._id })
+  await Card.create({ name, link, owner: ownerId })
     .then((newCard) => {
       res.send({ data: newCard });
     })
@@ -79,7 +79,7 @@ module.exports.addLike = (req, res) => Card.findByIdAndUpdate(
 )
   .orFail(() => {
     throw new Error('NotFound');
-  })
+  }).populate('owner')
   .then(() => res.send({ message: 'Вы поставили лайк' }))
   .catch((err) => {
     if (err.message === 'NotFound') {
@@ -103,7 +103,7 @@ module.exports.removeLike = (req, res) => Card.findByIdAndUpdate(
 )
   .orFail(() => {
     throw new Error('NotFound');
-  })
+  }).populate('owner')
   .then(() => res.send({ message: 'Вы удалили лайк' }))
   .catch((err) => {
     if (err.message === 'NotFound') {

@@ -1,18 +1,25 @@
 const { default: mongoose } = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { SECRET_KEY, ERROR_UNAUTHORIZED, ERROR_CONFLICT } = require('../utils/constants');
+const { SECRET_KEY, ERROR_CONFLICT } = require('../utils/constants');
 const User = require('../models/user');
 const {
   ERROR_INCORRECT_DATA,
-  ERROR_NOT_FOUND,
   ERROR_DEFAULT,
 } = require('../utils/constants');
+const NotFoundError = require('../errors/not-found-errors');
+const BadRequestError = require('../errors/bad-request');
+const Unauthorized = require('../errors/unauthorized');
 
-module.exports.getMe = async (req, res) => {
-  const user = await User.findById(req.user._id);
-
-  res.send(user);
+module.exports.getMe = async (req, res, next) => {
+  await User.findById(req.user._id).then((user) => {
+    if (!user) {
+      throw new NotFoundError('Нет пользователя с таким id');
+    }
+    res.send(user);
+  }).catch((err) => {
+    next(err);
+  });
 };
 
 module.exports.createUser = async (req, res) => {
@@ -24,7 +31,9 @@ module.exports.createUser = async (req, res) => {
     User.create({
       name, about, avatar, email, password: hash,
     })
-      .then((newUser) => res.send({ data: newUser }))
+      .then((newUser) => {
+        res.send({ data: newUser });
+      })
       .catch((err) => {
         if ((err.name === 'ValidationError')) {
           res
@@ -39,7 +48,7 @@ module.exports.createUser = async (req, res) => {
   });
 };
 
-module.exports.login = async (req, res) => {
+module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password').orFail().then(async (user) => {
     const matched = await bcrypt.compare(password, user.password);
@@ -51,13 +60,11 @@ module.exports.login = async (req, res) => {
         httpOnly: true,
       }).send(user.toJSON());
     } else {
-      throw new Error('Invalid email or password');
+      throw new Unauthorized('Invalid email or password');
     }
   })
-    .catch(() => {
-      res
-        .status(ERROR_UNAUTHORIZED)
-        .send('Неверная почта или пароль');
+    .catch((err) => {
+      next(err);
     });
 };
 
@@ -115,22 +122,19 @@ module.exports.patchAvatar = async (req, res) => {
     });
 };
 
-module.exports.getUser = async (req, res) => {
+module.exports.getUser = async (req, res, next) => {
   const { userId } = req.params;
 
   if (!mongoose.isValidObjectId(userId)) {
-    res
-      .status(ERROR_INCORRECT_DATA)
-      .send({ message: 'Переданы некорректные данные.' });
-    return;
+    throw new BadRequestError('Переданы некорректные данные.');
   }
 
   await User.findById(userId).orFail(() => {
-    throw new Error('NotFound');
+    throw new NotFoundError('Пользователь по указанному _id не найден');
   }).then((userData) => res.send({ data: userData }))
     .catch((err) => {
       if (err.message === 'NotFound') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь по указанному _id не найден' });
+        next(err);
       } else { res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }); }
     });
 };

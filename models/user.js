@@ -28,7 +28,6 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     required: true,
-    minlength: 2,
     type: String,
     select: false,
   },
@@ -47,7 +46,6 @@ userSchema.methods.toJSON = function () {
 
   delete data.password;
 
-  // eslint-disable-next-line no-underscore-dangle
   delete data.__v;
 
   return data;

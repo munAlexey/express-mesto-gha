@@ -1,11 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const { authorization } = require('./middlewre/authorization');
 
 const {
-  ERROR_DEFAULT, ERROR_NOT_FOUND,
+  ERROR_DEFAULT,
 } = require('./utils/constants');
 
 const userRouter = require('./routes/users');
@@ -23,15 +22,28 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   res.status(ERROR_DEFAULT).send({ message: 'Unauthorized' });
 });
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
-app.use(authorization);
+// app.use(authorization);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
 app.use((req, res) => {
-  res.status(ERROR_NOT_FOUND).send({ message: 'Роутер не найден' });
+  res.send(new Error('Роутер не найден'));
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
 });
 
 app.listen(PORT, () => {
