@@ -4,9 +4,10 @@ const {
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
 } = require('../utils/constants');
+const NotFoundError = require('../errors/not-found-errors');
 
 module.exports.getCards = async (req, res) => {
-  await Card.find({}).populate('owner')
+  Card.find({}).populate(['owner', 'likes'])
     .then((cards) => {
       res.send({ data: cards });
     })
@@ -33,16 +34,16 @@ module.exports.createCard = async (req, res) => {
 
 module.exports.deleteCard = async (req, res) => {
   const userId = req.user._id;
-  const owner = req.params.cardId;
+  const card = req.params.cardId;
 
-  Card.findById(owner)
-    .then((card) => {
-      Card.findByIdAndDelete(card)
+  Card.findById(card)
+    .then((foundCard) => {
+      Card.findByIdAndDelete(foundCard)
         .orFail(() => {
-          throw new Error('NotFound');
+          throw new NotFoundError('NotFound');
         })
         .then((result) => {
-          if (card.owner !== userId) {
+          if (card.card !== userId) {
             res.send(result);
           }
         }).catch((err) => {
@@ -78,7 +79,7 @@ module.exports.addLike = (req, res) => Card.findByIdAndUpdate(
   { new: true },
 )
   .orFail(() => {
-    throw new Error('NotFound');
+    throw new NotFoundError('NotFound');
   }).populate('owner')
   .then(() => res.send({ message: 'Вы поставили лайк' }))
   .catch((err) => {
@@ -102,7 +103,7 @@ module.exports.removeLike = (req, res) => Card.findByIdAndUpdate(
   { new: true },
 )
   .orFail(() => {
-    throw new Error('NotFound');
+    throw new NotFoundError('NotFound');
   }).populate('owner')
   .then(() => res.send({ message: 'Вы удалили лайк' }))
   .catch((err) => {

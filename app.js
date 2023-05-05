@@ -11,6 +11,8 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const authRouter = require('./routes/auth');
 
+const NotFoundError = require('./errors/not-found-errors');
+
 const app = express();
 const PORT = 3000;
 
@@ -26,11 +28,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use('/auth', authRouter);
-// app.use(authorization);
+app.use(authorization);
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
-app.use((req, res) => {
-  res.send(new Error('Роутер не найден'));
+app.use((req, res, next) => {
+  next(new NotFoundError('Роутер не найден'));
 });
 
 // eslint-disable-next-line no-unused-vars

@@ -2,6 +2,7 @@ const { Joi, celebrate, Segments } = require('celebrate');
 const express = require('express');
 
 const router = express.Router();
+const { urlR } = require('../utils/constants');
 
 const {
   createUser, login,
@@ -13,7 +14,7 @@ router.post('/signup', celebrate({
     email: Joi.string().email().required(),
     password: Joi.string().min(2).required(),
     about: Joi.string().min(2).max(30),
-    avatar: Joi.string(),
+    avatar: Joi.string().pattern(urlR).required(),
   },
 }), createUser);
 

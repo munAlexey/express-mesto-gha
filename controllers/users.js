@@ -22,7 +22,7 @@ module.exports.getMe = async (req, res, next) => {
   });
 };
 
-module.exports.createUser = async (req, res) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -32,17 +32,15 @@ module.exports.createUser = async (req, res) => {
       name, about, avatar, email, password: hash,
     })
       .then((newUser) => {
-        res.send({ data: newUser });
+        res.send({ data: newUser.toJSON() });
       })
       .catch((err) => {
         if ((err.name === 'ValidationError')) {
-          res
-            .status(ERROR_INCORRECT_DATA)
-            .send({ message: 'Переданы некорректные данные.' });
+          next(new BadRequestError('Переданы некорректные данные.'));
         } else if ((err.code === 11000)) {
           res.status(ERROR_CONFLICT).send({ message: 'Данный email уже зарегистрирован' });
         } else {
-          res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' });
+          next(err);
         }
       });
   });
@@ -50,7 +48,9 @@ module.exports.createUser = async (req, res) => {
 
 module.exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  User.findOne({ email }).select('+password').orFail().then(async (user) => {
+  User.findOne({ email }).select('+password').orFail(() => {
+    throw new Unauthorized('Invalid email or password');
+  }).then(async (user) => {
     const matched = await bcrypt.compare(password, user.password);
 
     if (matched) {
@@ -133,8 +133,6 @@ module.exports.getUser = async (req, res, next) => {
     throw new NotFoundError('Пользователь по указанному _id не найден');
   }).then((userData) => res.send({ data: userData }))
     .catch((err) => {
-      if (err.message === 'NotFound') {
-        next(err);
-      } else { res.status(ERROR_DEFAULT).send({ message: 'Ошибка по умолчанию.' }); }
+      next(err);
     });
 };
