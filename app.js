@@ -1,5 +1,5 @@
-const express = require('express');
 const mongoose = require('mongoose');
+const express = require('express');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const { authorization } = require('./middlewares/authorization');
