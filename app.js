@@ -27,8 +27,6 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 app.use(express.json());
 app.use(cookieParser());
 
-app.use('/api', require('./routes/users', './routes/cards', './routes/auth'));
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(requestLogger);
